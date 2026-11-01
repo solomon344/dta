@@ -1,9 +1,45 @@
 import Link from "next/link";
 import Icon from "@/components/Icon";
+import JsonLd from "@/components/JsonLd";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 import { connection } from "next/server";
 import { getPublicStats, type PublicStats } from "@/lib/public-stats";
+import { CONTACT_EMAIL, SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
+
+const organizationLd = {
+  "@context": "https://schema.org",
+  "@type": "EducationalOrganization",
+  name: SITE_NAME,
+  alternateName: "DTA",
+  url: SITE_URL,
+  logo: `${SITE_URL}/assets/dta-logo-full.png`,
+  description: SITE_DESCRIPTION,
+  email: CONTACT_EMAIL,
+  slogan: "Learn. Analyze. Innovate. Transform.",
+  address: { "@type": "PostalAddress", addressLocality: "Serekunda", addressCountry: "GM" },
+  areaServed: { "@type": "Country", name: "The Gambia" },
+  hasOfferCatalog: {
+    "@type": "OfferCatalog",
+    name: "Programs",
+    itemListElement: [
+      { "@type": "Course", name: "Data Analytics", description: "Excel, statistics, Power BI dashboards and basic Python.", provider: { "@type": "EducationalOrganization", name: SITE_NAME } },
+      { "@type": "Course", name: "Software Development", description: "HTML, CSS, JavaScript and frontend development with API integration.", provider: { "@type": "EducationalOrganization", name: SITE_NAME } },
+    ],
+  },
+};
+
+const websiteLd = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: SITE_NAME,
+  url: SITE_URL,
+  potentialAction: {
+    "@type": "SearchAction",
+    target: `${SITE_URL}/verify?q={certificate_id}`,
+    "query-input": "required name=certificate_id",
+  },
+};
 
 // Registry numbers are read from the database at request time (cached; see lib/public-stats.ts).
 export const instant = false;
@@ -62,6 +98,8 @@ export default async function Home() {
 
   return (
     <>
+      <JsonLd data={organizationLd} />
+      <JsonLd data={websiteLd} />
       <SiteHeader />
       <main className="w-full flex-1 pt-20">
         {/* Top ambient banner */}

@@ -1,6 +1,7 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Playfair_Display, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
+import { OPEN_GRAPH_BASE, SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
 
 const playfair = Playfair_Display({
   variable: "--font-playfair",
@@ -66,14 +67,53 @@ const ICON_NAMES = [
 ];
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: "DTA - Data Technology Academy | The Gambia",
+    default: "Data Technology Academy (DTA) | Software & Data Training in The Gambia",
     template: "%s | Data Technology Academy",
   },
-  description:
-    "Data Technology Academy trains young Gambians in software development and data analytics. Verify DTA graduate certificates online.",
-  keywords: ["certificate", "verification", "DTA", "Data Technology Academy", "The Gambia"],
-  authors: [{ name: "Data Technology Academy" }],
+  description: SITE_DESCRIPTION,
+  applicationName: SITE_NAME,
+  keywords: [
+    "Data Technology Academy",
+    "DTA",
+    "DTA Gambia",
+    "The Gambia",
+    "Gambia tech training",
+    "software development course",
+    "data analytics course",
+    "Power BI",
+    "Python",
+    "certificate verification",
+    "verify certificate",
+  ],
+  authors: [{ name: SITE_NAME, url: SITE_URL }],
+  creator: SITE_NAME,
+  publisher: SITE_NAME,
+  category: "education",
+  alternates: { canonical: "/" },
+  openGraph: {
+    ...OPEN_GRAPH_BASE,
+    url: "/",
+    title: "Data Technology Academy (DTA) | The Gambia",
+    description: SITE_DESCRIPTION,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Data Technology Academy (DTA) | The Gambia",
+    description: SITE_DESCRIPTION,
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 },
+  },
+  formatDetection: { telephone: false, email: false, address: false },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0d1c32",
+  colorScheme: "light",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

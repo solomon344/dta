@@ -5,12 +5,44 @@ import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
 import VerifyPortal, { VerifyPortalFallback } from "@/components/VerifyPortal";
 import { connection } from "next/server";
+import { getCertificateViewByNumber } from "@/lib/certificates";
 import { getPublicStats } from "@/lib/public-stats";
+import { OPEN_GRAPH_BASE } from "@/lib/site";
 
-export const metadata: Metadata = {
-  title: "Verify Certificate",
-  description: "Verify the authenticity of a Data Technology Academy certificate by ID or graduate name.",
-};
+const VERIFY_DESCRIPTION =
+  "Verify the authenticity of a Data Technology Academy (DTA) certificate by its certificate ID or the graduate's name.";
+
+export async function generateMetadata({ searchParams }: PageProps<"/verify">): Promise<Metadata> {
+  const { q } = await searchParams;
+  const query = typeof q === "string" ? q.trim() : "";
+  const base: Metadata = {
+    title: "Verify a Certificate",
+    description: VERIFY_DESCRIPTION,
+    alternates: { canonical: "/verify" },
+    openGraph: { ...OPEN_GRAPH_BASE, title: "Verify a DTA Certificate", description: VERIFY_DESCRIPTION, url: "/verify" },
+    twitter: { title: "Verify a DTA Certificate", description: VERIFY_DESCRIPTION },
+  };
+  if (!query) return base;
+
+  // Shared result links get a descriptive preview, but stay out of search indexes.
+  const cert = await getCertificateViewByNumber(query);
+  const noindex = { robots: { index: false, follow: true } };
+  if (!cert) return { ...base, ...noindex };
+
+  const valid = cert.status === "ISSUED";
+  const title = `${valid ? "Verified" : "Revoked"}: ${cert.studentName} — ${cert.number}`;
+  const description = valid
+    ? `${cert.studentName} completed ${cert.programName} (${cert.cohortName}) at Data Technology Academy. Certificate ${cert.number}, issued ${cert.issueDateLabel}.`
+    : `Certificate ${cert.number} issued by Data Technology Academy has been revoked.`;
+  return {
+    ...base,
+    ...noindex,
+    title,
+    description,
+    openGraph: { ...OPEN_GRAPH_BASE, title, description, url: `/verify?q=${encodeURIComponent(cert.number)}` },
+    twitter: { title, description },
+  };
+}
 
 export const instant = false;
 

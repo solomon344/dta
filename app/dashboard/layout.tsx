@@ -5,7 +5,10 @@ import { EdgeStoreProvider } from "@/lib/edgestore";
 import { requireUser } from "@/lib/session";
 import { signOutAction } from "../(auth)/actions";
 
-export const metadata: Metadata = { title: { default: "Dashboard", template: "%s | DTA Staff Portal" } };
+export const metadata: Metadata = {
+  title: { default: "Dashboard", template: "%s | DTA Staff Portal" },
+  robots: { index: false, follow: false },
+};
 
 // Every dashboard page depends on the signed-in user, so navigations wait for the server.
 export const instant = false;
