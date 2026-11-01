@@ -1,0 +1,250 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Better Auth ────────────────────────────────────────────────────────────
+// Field names follow Better Auth's core schema plus the admin plugin fields.
+
+model User {
+  id            String    @id
+  name          String
+  email         String    @unique
+  emailVerified Boolean   @default(false)
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  role          String?   @default("staff")
+  banned        Boolean?  @default(false)
+  banReason     String?
+  banExpires    DateTime?
+
+  sessions           Session[]
+  accounts           Account[]
+  staffProfile       StaffProfile?
+  invitationsSent    Invitation[]
+  certificatesIssued Certificate[]
+
+  @@map("user")
+}
+
+model Session {
+  id             String   @id
+  expiresAt      DateTime
+  token          String   @unique
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  ipAddress      String?
+  userAgent      String?
+  userId         String
+  impersonatedBy String?
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
+}
+
+// ─── Staff ──────────────────────────────────────────────────────────────────
+
+model StaffProfile {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  jobTitle     String?
+  phone        String?
+  bio          String?
+  /// Public EdgeStore URLs (staffImages bucket).
+  photoUrl     String?
+  signatureUrl String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user         User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  signatoryFor CohortSignatory[]
+  documents    StaffDocument[]
+
+  @@map("staff_profile")
+}
+
+model StaffDocument {
+  id         String   @id @default(cuid())
+  profileId  String
+  name       String
+  /// Protected EdgeStore URL (staffDocuments bucket).
+  url        String
+  size       Int
+  mimeType   String?
+  uploadedAt DateTime @default(now())
+
+  profile StaffProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId])
+  @@map("staff_document")
+}
+
+model Invitation {
+  id          String    @id @default(cuid())
+  email       String
+  name        String?
+  role        String    @default("staff")
+  jobTitle    String?
+  /// SHA-256 of the invite token; the raw token only exists in the invite link.
+  tokenHash   String    @unique
+  expiresAt   DateTime
+  acceptedAt  DateTime?
+  revokedAt   DateTime?
+  invitedById String
+  createdAt   DateTime  @default(now())
+
+  invitedBy User @relation(fields: [invitedById], references: [id], onDelete: Cascade)
+
+  @@index([email])
+  @@map("invitation")
+}
+
+// ─── Academy ────────────────────────────────────────────────────────────────
+
+model Program {
+  id                String   @id @default(cuid())
+  /// Short code, e.g. "DA" or "SD".
+  code              String   @unique
+  name              String
+  certificateTitle  String
+  certificateDetail String
+  competencies      String[]
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  students Student[]
+
+  @@map("program")
+}
+
+enum CohortStatus {
+  UPCOMING
+  ACTIVE
+  COMPLETED
+}
+
+model Cohort {
+  id          String       @id @default(cuid())
+  name        String       @unique
+  description String?
+  startDate   DateTime?
+  endDate     DateTime?
+  status      CohortStatus @default(UPCOMING)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  students    Student[]
+  signatories CohortSignatory[]
+
+  @@map("cohort")
+}
+
+/// Staff whose signatures appear on a cohort's certificates, left to right.
+model CohortSignatory {
+  id             String @id @default(cuid())
+  cohortId       String
+  staffProfileId String
+  /// Printed under the signature, e.g. "Director, DTA".
+  title          String
+  sortOrder      Int    @default(0)
+
+  cohort       Cohort       @relation(fields: [cohortId], references: [id], onDelete: Cascade)
+  staffProfile StaffProfile @relation(fields: [staffProfileId], references: [id], onDelete: Cascade)
+
+  @@unique([cohortId, staffProfileId])
+  @@map("cohort_signatory")
+}
+
+enum StudentStatus {
+  ENROLLED
+  GRADUATED
+  WITHDRAWN
+}
+
+model Student {
+  id        String        @id @default(cuid())
+  fullName  String
+  email     String?
+  phone     String?
+  status    StudentStatus @default(ENROLLED)
+  notes     String?
+  programId String
+  cohortId  String
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  program     Program      @relation(fields: [programId], references: [id], onDelete: Restrict)
+  cohort      Cohort       @relation(fields: [cohortId], references: [id], onDelete: Restrict)
+  certificate Certificate?
+
+  @@index([fullName])
+  @@index([cohortId])
+  @@index([programId])
+  @@map("student")
+}
+
+enum CertificateStatus {
+  ISSUED
+  REVOKED
+  /// Un-issued (e.g. the student didn't complete). Hidden from the public; the ID stays
+  /// reserved and is restored if the student is issued a certificate again.
+  VOIDED
+}
+
+model Certificate {
+  id           String            @id @default(cuid())
+  /// Public certificate ID printed on the certificate, e.g. "DTA2064".
+  number       String            @unique
+  studentId    String            @unique
+  issueDate    DateTime          @db.Date
+  status       CertificateStatus @default(ISSUED)
+  revokedAt    DateTime?
+  revokeReason String?
+  voidedAt     DateTime?
+  issuedById   String?
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  student  Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  issuedBy User?   @relation(fields: [issuedById], references: [id], onDelete: SetNull)
+
+  @@map("certificate")
+}
