@@ -36,6 +36,7 @@ const ICON_NAMES = [
   "edit",
   "error",
   "flag",
+  "format_quote",
   "group",
   "groups",
   "image",

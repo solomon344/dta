@@ -34,6 +34,7 @@ export default function SiteFooter() {
             <ul className="space-y-space-xs text-body-sm">
               <li><Link href="/#tracks" className="hover:text-surface-container-lowest">Software Development</Link></li>
               <li><Link href="/#tracks" className="hover:text-surface-container-lowest">Data Analytics</Link></li>
+              <li><Link href="/testimonials" className="hover:text-surface-container-lowest">Testimonials</Link></li>
             </ul>
           </div>
           <div className="space-y-space-sm">

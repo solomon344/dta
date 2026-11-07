@@ -23,11 +23,12 @@ model User {
   banReason     String?
   banExpires    DateTime?
 
-  sessions           Session[]
-  accounts           Account[]
-  staffProfile       StaffProfile?
-  invitationsSent    Invitation[]
-  certificatesIssued Certificate[]
+  sessions             Session[]
+  accounts             Account[]
+  staffProfile         StaffProfile?
+  invitationsSent      Invitation[]
+  certificatesIssued   Certificate[]
+  testimonialsReviewed Testimonial[]
 
   @@map("user")
 }
@@ -246,5 +247,44 @@ model Certificate {
   student  Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
   issuedBy User?   @relation(fields: [issuedById], references: [id], onDelete: SetNull)
 
+  testimonials Testimonial[]
+
   @@map("certificate")
+}
+
+enum TestimonialStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+/// Submitted through the public form; only APPROVED ones are ever shown publicly.
+model Testimonial {
+  id            String            @id @default(cuid())
+  name          String
+  /// Private: for staff follow-up only, never shown publicly.
+  email         String?
+  /// Current role shown under the name, e.g. "Data Analyst at Acme".
+  role          String?
+  quote         String
+  /// 1-5, optional.
+  rating        Int?
+  status        TestimonialStatus @default(PENDING)
+  /// When the submitter agreed to publication of their name and words.
+  consentedAt   DateTime
+  /// Set when the submitter proved a certificate; drives the "verified graduate" badge.
+  certificateId String?
+  /// Salted hash of the submitter's IP, used only to rate-limit the public form.
+  ipHash        String?
+  reviewedById  String?
+  reviewedAt    DateTime?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  certificate Certificate? @relation(fields: [certificateId], references: [id], onDelete: SetNull)
+  reviewedBy  User?        @relation(fields: [reviewedById], references: [id], onDelete: SetNull)
+
+  @@index([status, createdAt])
+  @@index([ipHash, createdAt])
+  @@map("testimonial")
 }

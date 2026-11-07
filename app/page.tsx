@@ -3,8 +3,10 @@ import Icon from "@/components/Icon";
 import JsonLd from "@/components/JsonLd";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
+import TestimonialCard from "@/components/TestimonialCard";
 import { connection } from "next/server";
 import { getPublicStats, type PublicStats } from "@/lib/public-stats";
+import { getPublicTestimonials } from "@/lib/testimonials";
 import { CONTACT_EMAIL, SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
 
 const organizationLd = {
@@ -89,7 +91,7 @@ const buildTracks = (stats: PublicStats) => [
 
 export default async function Home() {
   await connection();
-  const stats = await getPublicStats();
+  const [stats, testimonials] = await Promise.all([getPublicStats(), getPublicTestimonials(3)]);
   const tracks = buildTracks(stats);
   const da = stats.byProgram.DA ?? 0;
   const sd = stats.byProgram.SD ?? 0;
@@ -344,6 +346,34 @@ export default async function Home() {
             </div>
           </div>
         </section>
+
+        {/* Testimonials (only once some are approved) */}
+        {testimonials.length > 0 && (
+          <section id="testimonials" className="w-full bg-surface-container-low py-space-2xl">
+            <div className="mx-auto max-w-7xl space-y-space-xl px-4 sm:px-6 lg:px-12">
+              <div className="flex flex-col justify-between gap-space-md md:flex-row md:items-end">
+                <div className="space-y-space-2xs">
+                  <span className="text-label-tag uppercase tracking-widest text-secondary">Testimonials</span>
+                  <h2 className="font-display text-headline-xl-mobile text-primary-container md:text-headline-xl">
+                    What People Say About DTA.
+                  </h2>
+                </div>
+                <Link
+                  href="/testimonials"
+                  className="inline-flex items-center gap-space-xs self-start rounded-lg bg-surface-container px-space-md py-space-xs text-label-lg text-primary-container transition-all hover:bg-surface-container-highest md:self-auto"
+                >
+                  Read more or share yours
+                  <Icon name="arrow_forward" className="text-base" />
+                </Link>
+              </div>
+              <div className="grid grid-cols-1 gap-space-lg md:grid-cols-3">
+                {testimonials.map((t) => (
+                  <TestimonialCard key={t.id} testimonial={t} />
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* Tracks */}
         <section id="tracks" className="w-full bg-surface-container-lowest py-space-2xl">

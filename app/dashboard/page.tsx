@@ -9,7 +9,7 @@ import { requireUser } from "@/lib/session";
 export default async function DashboardHome() {
   const user = await requireUser();
 
-  const [students, graduates, issued, revoked, cohorts, staff, recent, activeCohorts] = await Promise.all([
+  const [students, graduates, issued, revoked, cohorts, staff, recent, activeCohorts, pendingTestimonials] = await Promise.all([
     prisma.student.count(),
     prisma.student.count({ where: { status: "GRADUATED" } }),
     prisma.certificate.count({ where: { status: "ISSUED" } }),
@@ -27,6 +27,7 @@ export default async function DashboardHome() {
       include: { _count: { select: { students: true } } },
       take: 5,
     }),
+    prisma.testimonial.count({ where: { status: "PENDING" } }),
   ]);
 
   const stats = [
@@ -113,6 +114,7 @@ export default async function DashboardHome() {
             <dl className="space-y-space-xs text-body-sm">
               <div className="flex justify-between"><dt className="text-on-surface-variant">Revoked certificates</dt><dd className="font-bold">{revoked}</dd></div>
               <div className="flex justify-between"><dt className="text-on-surface-variant">Staff accounts</dt><dd className="font-bold">{staff}</dd></div>
+              <div className="flex justify-between"><dt className="text-on-surface-variant"><Link href="/dashboard/testimonials" className="hover:text-secondary">Testimonials to review</Link></dt><dd className="font-bold">{pendingTestimonials}</dd></div>
             </dl>
           </Card>
         </div>

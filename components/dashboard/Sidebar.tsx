@@ -13,6 +13,7 @@ const links = [
   { href: "/dashboard/cohorts", label: "Cohorts", icon: "calendar_month" },
   { href: "/dashboard/programs", label: "Programs", icon: "menu_book" },
   { href: "/dashboard/certificates", label: "Certificates", icon: "workspace_premium" },
+  { href: "/dashboard/testimonials", label: "Testimonials", icon: "format_quote" },
   { href: "/dashboard/staff", label: "Staff", icon: "badge", adminOnly: true },
   { href: "/dashboard/profile", label: "My Profile", icon: "person" },
 ];

@@ -6,6 +6,7 @@ const navLinks = [
   { href: "/#mission", label: "Mission" },
   { href: "/#tracks", label: "Curriculum & Tracks" },
   { href: "/#cohort-impact", label: "Impact" },
+  { href: "/testimonials", label: "Testimonials" },
   { href: "/verify", label: "Verify Certificate", key: "verify" },
 ];
 
