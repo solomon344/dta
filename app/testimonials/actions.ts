@@ -17,6 +17,7 @@ const testimonialSchema = z.object({
     .string({ error: "Tell us about your experience." })
     .min(20, "Please write at least 20 characters.")
     .max(1000, "Please keep it under 1000 characters."),
+  improvement: z.string().max(1000, "Please keep it under 1000 characters.").optional(),
   rating: z.coerce.number().int().min(1).max(5).optional(),
   certificateNumber: z.string().max(40).optional(),
   consent: z.literal("on", { error: "Please confirm we may publish your testimonial." }),
@@ -35,7 +36,7 @@ export async function submitTestimonialAction(_: ActionState, formData: FormData
 
   const parsed = testimonialSchema.safeParse(formObject(formData));
   if (!parsed.success) return fieldErrorsFrom(parsed.error);
-  const { name, email, role, quote, rating, certificateNumber } = parsed.data;
+  const { name, email, role, quote, improvement, rating, certificateNumber } = parsed.data;
 
   const ipHash = await clientIpHash();
   if (ipHash) {
@@ -66,6 +67,6 @@ export async function submitTestimonialAction(_: ActionState, formData: FormData
     certificateId = certificate.id;
   }
 
-  await prisma.testimonial.create({ data: { name, email, role, quote, rating, certificateId, ipHash, consentedAt: new Date() } });
+  await prisma.testimonial.create({ data: { name, email, role, quote, improvement, rating, certificateId, ipHash, consentedAt: new Date() } });
   return { ok: true, message: THANKS };
 }

@@ -75,6 +75,14 @@ export default async function TestimonialsPage() {
                 <textarea id="quote" name="quote" rows={5} required minLength={20} maxLength={1000} className={inputClass} />
               </Field>
               <Field
+                label="What can we improve on? (optional)"
+                name="improvement"
+                className="sm:col-span-2"
+                hint="Private. Only our team sees this; it's never published."
+              >
+                <textarea id="improvement" name="improvement" rows={3} maxLength={1000} className={inputClass} />
+              </Field>
+              <Field
                 label="Certificate ID (optional)"
                 name="certificateNumber"
                 className="sm:col-span-2"

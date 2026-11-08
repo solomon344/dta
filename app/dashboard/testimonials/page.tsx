@@ -81,6 +81,12 @@ export default async function TestimonialsAdminPage({ searchParams }: PageProps<
                 </div>
               </div>
               <blockquote className="mt-space-sm whitespace-pre-line text-body-md text-on-surface">“{t.quote}”</blockquote>
+              {t.improvement && (
+                <div className="mt-space-sm rounded-lg bg-surface-container-low p-space-sm">
+                  <div className="text-label-tag uppercase tracking-wider text-on-surface-variant">What we can improve (private)</div>
+                  <p className="mt-1 whitespace-pre-line text-body-md text-on-surface">{t.improvement}</p>
+                </div>
+              )}
               <p className="mt-space-sm text-body-sm text-on-surface-variant">
                 Submitted {formatDate(t.createdAt)}
                 {t.email && <> · <a href={`mailto:${t.email}`} className="text-secondary hover:underline">{t.email}</a></>}

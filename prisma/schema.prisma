@@ -267,6 +267,8 @@ model Testimonial {
   /// Current role shown under the name, e.g. "Data Analyst at Acme".
   role          String?
   quote         String
+  /// Private: "What can we improve on?" answer, for staff only, never shown publicly.
+  improvement   String?
   /// 1-5, optional.
   rating        Int?
   status        TestimonialStatus @default(PENDING)
