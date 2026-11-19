@@ -39,6 +39,7 @@ const ICON_NAMES = [
   "format_quote",
   "group",
   "groups",
+  "how_to_reg",
   "image",
   "info",
   "lock",

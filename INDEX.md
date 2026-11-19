@@ -213,7 +213,7 @@ Edit: `app/page.tsx`
 
 ## 📞 Support Resources
 
-- **Academy Email:** admin@dta.gm
+- **Academy Email:** info@dta.gm
 - **Next.js Docs:** https://nextjs.org/docs
 - **Tailwind Docs:** https://tailwindcss.com/docs
 - **TypeScript Docs:** https://www.typescriptlang.org/docs

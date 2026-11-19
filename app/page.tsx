@@ -4,6 +4,7 @@ import JsonLd from "@/components/JsonLd";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 import TestimonialCard from "@/components/TestimonialCard";
+import WhatsAppButton from "@/components/WhatsAppButton";
 import { connection } from "next/server";
 import { getPublicStats, type PublicStats } from "@/lib/public-stats";
 import { getPublicTestimonials } from "@/lib/testimonials";
@@ -161,11 +162,18 @@ export default async function Home() {
                 </p>
 
                 <div className="flex flex-wrap items-center gap-space-md pt-space-xs">
-                  <a
-                    href="#tracks"
+                  <Link
+                    href="/waitlist"
                     className="inline-flex items-center gap-space-xs rounded-lg bg-primary-container px-space-lg py-space-sm text-label-lg text-on-primary shadow-md transition-all hover:bg-secondary"
                   >
-                    Explore Tracks &amp; Curriculum
+                    <Icon name="how_to_reg" className="text-base" />
+                    Join the Next Cohort Waitlist
+                  </Link>
+                  <a
+                    href="#tracks"
+                    className="inline-flex items-center gap-space-xs rounded-lg bg-surface-container-lowest px-space-lg py-space-sm text-label-lg text-primary-container shadow-sm transition-all hover:bg-surface-container-high"
+                  >
+                    Explore Tracks
                     <Icon name="arrow_forward" className="text-base" />
                   </a>
                   <Link
@@ -473,15 +481,26 @@ export default async function Home() {
 
         {/* Final CTA */}
         <section className="w-full bg-primary-container py-space-2xl text-on-primary">
-          <div className="mx-auto max-w-3xl space-y-space-md px-4 text-center sm:px-6">
-            <h2 className="font-display text-headline-xl-mobile text-surface-container-lowest md:text-headline-xl">
+          <div className="mx-auto max-w-5xl space-y-space-md px-4 text-center sm:px-6">
+            <h2 className="mx-auto max-w-3xl font-display text-headline-xl-mobile text-surface-container-lowest md:text-headline-xl">
               Be Part of The Gambia&apos;s Next Generation of Data &amp; Tech Leaders.
             </h2>
-            <p className="text-body-xl leading-relaxed text-surface-container-high">
-              Interested in a future cohort, or want to hire or mentor our graduates? Get in touch with
-              the academy.
+            <p className="mx-auto max-w-3xl text-body-xl leading-relaxed text-surface-container-high">
+              Join the waitlist for the next cohort, verify a graduate&apos;s certificate, or get in touch
+              to hire or mentor our graduates.
             </p>
-            <div className="grid grid-cols-1 gap-space-md pt-space-md text-left sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-space-md pt-space-md text-left md:grid-cols-3">
+              <div className="flex flex-col space-y-space-sm rounded-xl bg-white/10 p-space-lg backdrop-blur-md">
+                <Icon name="how_to_reg" className="text-3xl text-secondary-fixed" />
+                <h3 className="text-headline-sm text-surface-container-lowest">Join the Next Cohort</h3>
+                <p className="flex-1 text-body-sm text-surface-container-high">
+                  Get on the waitlist and we&apos;ll contact you when applications open.
+                </p>
+                <Link href="/waitlist" className="inline-flex items-center gap-space-xs pt-space-2xs text-label-lg font-bold text-secondary-fixed hover:text-surface-container-lowest">
+                  Join the waitlist <Icon name="arrow_forward" className="text-base" />
+                </Link>
+                <WhatsAppButton label="WhatsApp community" variant="light" className="self-start" />
+              </div>
               <div className="space-y-space-sm rounded-xl bg-white/10 p-space-lg backdrop-blur-md">
                 <Icon name="school" className="text-3xl text-secondary-fixed" />
                 <h3 className="text-headline-sm text-surface-container-lowest">Have a Certificate?</h3>
@@ -498,8 +517,8 @@ export default async function Home() {
                 <p className="text-body-sm text-surface-container-high">
                   Students, employers and volunteer mentors — we&apos;d love to hear from you.
                 </p>
-                <a href="mailto:admin@dta.gm" className="inline-flex items-center gap-space-xs pt-space-2xs text-label-lg font-bold text-tertiary-fixed-dim hover:text-surface-container-lowest">
-                  admin@dta.gm <Icon name="arrow_forward" className="text-base" />
+                <a href="mailto:info@dta.gm" className="inline-flex items-center gap-space-xs pt-space-2xs text-label-lg font-bold text-tertiary-fixed-dim hover:text-surface-container-lowest">
+                  info@dta.gm <Icon name="arrow_forward" className="text-base" />
                 </a>
               </div>
             </div>

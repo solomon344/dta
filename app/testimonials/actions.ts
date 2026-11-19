@@ -1,9 +1,8 @@
 "use server";
 
-import { createHash } from "node:crypto";
-import { headers } from "next/headers";
 import { z } from "zod";
 import { fieldErrorsFrom, formObject, type ActionState } from "@/lib/action-state";
+import { clientIpHash } from "@/lib/client-ip";
 import { prisma } from "@/lib/db";
 
 const MAX_PER_HOUR = 5;
@@ -22,13 +21,6 @@ const testimonialSchema = z.object({
   certificateNumber: z.string().max(40).optional(),
   consent: z.literal("on", { error: "Please confirm we may publish your testimonial." }),
 });
-
-/** Salted so the stored value can't be turned back into an IP address. */
-async function clientIpHash(): Promise<string | null> {
-  const ip = (await headers()).get("x-forwarded-for")?.split(",")[0]?.trim();
-  if (!ip) return null;
-  return createHash("sha256").update(`${process.env.BETTER_AUTH_SECRET}:${ip}`).digest("hex");
-}
 
 export async function submitTestimonialAction(_: ActionState, formData: FormData): Promise<ActionState> {
   // Honeypot: hidden from people, so only bots fill it. Pretend it worked.

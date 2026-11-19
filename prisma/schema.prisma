@@ -152,6 +152,7 @@ model Program {
   updatedAt         DateTime @updatedAt
 
   students Student[]
+  waitlist WaitlistEntry[]
 
   @@map("program")
 }
@@ -212,9 +213,10 @@ model Student {
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
 
-  program     Program      @relation(fields: [programId], references: [id], onDelete: Restrict)
-  cohort      Cohort       @relation(fields: [cohortId], references: [id], onDelete: Restrict)
-  certificate Certificate?
+  program       Program        @relation(fields: [programId], references: [id], onDelete: Restrict)
+  cohort        Cohort         @relation(fields: [cohortId], references: [id], onDelete: Restrict)
+  certificate   Certificate?
+  waitlistEntry WaitlistEntry?
 
   @@index([fullName])
   @@index([cohortId])
@@ -289,4 +291,41 @@ model Testimonial {
   @@index([status, createdAt])
   @@index([ipHash, createdAt])
   @@map("testimonial")
+}
+
+enum WaitlistStatus {
+  NEW
+  CONTACTED
+  ENROLLED
+  ARCHIVED
+}
+
+/// People interested in a future cohort, from the public waitlist form.
+model WaitlistEntry {
+  id          String         @id @default(cuid())
+  fullName    String
+  /// As entered; `phoneDigits` is the digits-only form used to spot repeat sign-ups.
+  phone       String
+  phoneDigits String
+  email       String?
+  location    String?
+  /// Null means "not sure yet".
+  programId   String?
+  note        String?
+  status      WaitlistStatus @default(NEW)
+  consentedAt DateTime
+  /// Salted hash of the submitter's IP, used only to rate-limit the public form.
+  ipHash      String?
+  /// Set when staff enroll this person into a cohort.
+  studentId   String?        @unique
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  program Program? @relation(fields: [programId], references: [id], onDelete: SetNull)
+  student Student? @relation(fields: [studentId], references: [id], onDelete: SetNull)
+
+  @@index([status, createdAt])
+  @@index([phoneDigits])
+  @@index([ipHash, createdAt])
+  @@map("waitlist_entry")
 }

@@ -10,7 +10,7 @@ const navLinks = [
   { href: "/verify", label: "Verify Certificate", key: "verify" },
 ];
 
-export default function SiteHeader({ active }: { active?: "verify" }) {
+export default function SiteHeader({ active }: { active?: "verify" | "waitlist" }) {
   return (
     <header className="no-print fixed inset-x-0 top-0 z-50 w-full bg-surface-container-lowest/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between gap-space-md px-4 sm:px-6 lg:px-12">
@@ -60,12 +60,14 @@ export default function SiteHeader({ active }: { active?: "verify" }) {
           <Icon name="verified" className="text-base" />
           Verify
         </Link>
-        <a
-          href="mailto:admin@dta.gm"
-          className="hidden items-center justify-center rounded-lg bg-secondary px-space-md py-space-xs text-label-lg text-on-secondary shadow-[0_4px_16px_rgba(0,81,213,0.2)] transition-all hover:bg-secondary-container lg:inline-flex"
+        <Link
+          href="/waitlist"
+          aria-current={active === "waitlist" ? "page" : undefined}
+          className="hidden items-center justify-center gap-space-xs rounded-lg bg-secondary px-space-md py-space-xs text-label-lg text-on-secondary shadow-[0_4px_16px_rgba(0,81,213,0.2)] transition-all hover:bg-secondary-container lg:inline-flex"
         >
-          Contact Admissions
-        </a>
+          <Icon name="how_to_reg" className="text-base" />
+          Join the Waitlist
+        </Link>
       </div>
     </header>
   );

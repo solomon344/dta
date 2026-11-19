@@ -94,7 +94,7 @@ npm install
 
 - **Main docs:** See `README.md`
 - **Setup guide:** See `SETUP.md`
-- **Academy email:** admin@dta.gm
+- **Academy email:** info@dta.gm
 
 ---
 

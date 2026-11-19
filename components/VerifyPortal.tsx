@@ -105,7 +105,7 @@ export default function VerifyPortal({ totalGraduates }: { totalGraduates: numbe
             <h2 className="font-display text-headline-lg text-primary-container">No matching certificate</h2>
             <p className="max-w-md text-body-md text-on-surface-variant">{status.message}</p>
             <p className="text-body-sm text-outline">
-              Check the ID for typos, or contact <a className="text-secondary hover:underline" href="mailto:admin@dta.gm">admin@dta.gm</a>.
+              Check the ID for typos, or contact <a className="text-secondary hover:underline" href="mailto:info@dta.gm">info@dta.gm</a>.
             </p>
           </div>
         )}
@@ -149,7 +149,7 @@ export default function VerifyPortal({ totalGraduates }: { totalGraduates: numbe
               longer valid.{status.certificate.revokeReason ? ` Reason: ${status.certificate.revokeReason}` : ""}
             </p>
             <p className="text-body-sm text-outline">
-              Questions? Contact <a className="text-secondary hover:underline" href="mailto:admin@dta.gm">admin@dta.gm</a>.
+              Questions? Contact <a className="text-secondary hover:underline" href="mailto:info@dta.gm">info@dta.gm</a>.
             </p>
           </div>
         )}

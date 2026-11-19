@@ -139,10 +139,10 @@ export default async function VerifyPage() {
                 the academy directly.
               </p>
               <a
-                href="mailto:admin@dta.gm"
+                href="mailto:info@dta.gm"
                 className="inline-flex items-center gap-space-xs rounded-lg bg-secondary px-space-lg py-3 text-label-lg text-on-secondary shadow-lg transition-all hover:bg-secondary-container"
               >
-                Contact admin@dta.gm
+                Contact info@dta.gm
                 <Icon name="arrow_forward" className="text-base" />
               </a>
             </div>

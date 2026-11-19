@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import Icon from "./Icon";
+import WhatsAppButton from "./WhatsAppButton";
 
 export default function SiteFooter() {
   return (
@@ -18,6 +19,7 @@ export default function SiteFooter() {
             <p className="text-label-tag uppercase tracking-wider text-surface-container-highest">
               Learn • Analyze • Innovate • Transform
             </p>
+            <WhatsAppButton label="WhatsApp community" variant="light" />
           </div>
           <div className="space-y-space-sm">
             <h4 className="text-label-lg uppercase tracking-wider text-surface-container-lowest">Contact</h4>
@@ -25,7 +27,7 @@ export default function SiteFooter() {
               <li>Serekunda, The Gambia</li>
               <li>West Africa</li>
               <li className="pt-space-2xs text-label-md text-secondary-fixed">
-                <a href="mailto:admin@dta.gm" className="hover:underline">admin@dta.gm</a>
+                <a href="mailto:info@dta.gm" className="hover:underline">info@dta.gm</a>
               </li>
             </ul>
           </div>
@@ -35,6 +37,7 @@ export default function SiteFooter() {
               <li><Link href="/#tracks" className="hover:text-surface-container-lowest">Software Development</Link></li>
               <li><Link href="/#tracks" className="hover:text-surface-container-lowest">Data Analytics</Link></li>
               <li><Link href="/testimonials" className="hover:text-surface-container-lowest">Testimonials</Link></li>
+              <li><Link href="/waitlist" className="hover:text-surface-container-lowest">Join the waitlist</Link></li>
             </ul>
           </div>
           <div className="space-y-space-sm">

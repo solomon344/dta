@@ -240,7 +240,7 @@ For issues:
 1. Check the main [README.md](README.md)
 2. Verify all dependencies installed (`npm list`)
 3. Check [Next.js Documentation](https://nextjs.org/docs)
-4. Contact support at admin@dta.gm
+4. Contact support at info@dta.gm
 
 ## 🔄 Updates & Maintenance
 
