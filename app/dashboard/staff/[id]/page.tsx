@@ -19,7 +19,7 @@ export default async function StaffMemberPage({ params }: PageProps<"/dashboard/
     where: { id },
     include: { staffProfile: { include: { signatoryFor: { include: { cohort: { select: { name: true } } } } } } },
   });
-  if (!user) notFound();
+  if (!user || (user.role !== "admin" && user.role !== "staff")) notFound();
   const signatoryFor = user.staffProfile?.signatoryFor ?? [];
 
   return (

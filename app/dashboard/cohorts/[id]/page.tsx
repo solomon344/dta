@@ -16,6 +16,8 @@ import {
   unissueCohortCertificatesAction,
   removeSignatoryAction,
 } from "../actions";
+import PortalLinksForm from "@/components/dashboard/PortalLinksForm";
+import { createCohortPortalLinksAction } from "../../students/portal-actions";
 import CohortForm from "../CohortForm";
 
 export const metadata: Metadata = { title: "Cohort" };
@@ -35,7 +37,7 @@ export default async function CohortPage({ params }: PageProps<"/dashboard/cohor
   if (!cohort) notFound();
 
   const noCertificate = { OR: [{ certificate: null }, { certificate: { status: "VOIDED" as const } }] };
-  const [byProgram, staff, withoutCert, graduatedWithoutCert, issuedCount, voidedCount, lastIssueDate] = await Promise.all([
+  const [byProgram, staff, withoutCert, graduatedWithoutCert, issuedCount, voidedCount, lastIssueDate, studentCount, activated] = await Promise.all([
     prisma.student.groupBy({ by: ["programId", "status"], where: { cohortId: id }, _count: true }),
     prisma.staffProfile.findMany({
       where: { user: { banned: { not: true } } },
@@ -47,6 +49,8 @@ export default async function CohortPage({ params }: PageProps<"/dashboard/cohor
     prisma.certificate.count({ where: { status: "ISSUED", student: { cohortId: id } } }),
     prisma.certificate.count({ where: { status: "VOIDED", student: { cohortId: id } } }),
     latestCohortIssueDate(id),
+    prisma.student.count({ where: { cohortId: id, status: { not: "WITHDRAWN" } } }),
+    prisma.student.count({ where: { cohortId: id, status: { not: "WITHDRAWN" }, userId: { not: null } } }),
   ]);
   const programs = await prisma.program.findMany({ where: { id: { in: [...new Set(byProgram.map((r) => r.programId))] } } });
 
@@ -177,6 +181,19 @@ export default async function CohortPage({ params }: PageProps<"/dashboard/cohor
                   );
                 })}
               </ul>
+            )}
+          </Card>
+
+          <Card title="Student portal">
+            <p className="mb-space-sm text-body-sm text-on-surface-variant">
+              {activated} of {studentCount} student{studentCount === 1 ? "" : "s"} activated. Create links for everyone else and send them on WhatsApp.
+            </p>
+            {activated < studentCount && (
+              <PortalLinksForm
+                action={createCohortPortalLinksAction.bind(null, cohort.id)}
+                label="Create activation links"
+                confirm="Create new activation links for everyone who hasn't activated? Older links for them will stop working."
+              />
             )}
           </Card>
 

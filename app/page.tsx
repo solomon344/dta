@@ -3,10 +3,12 @@ import Icon from "@/components/Icon";
 import JsonLd from "@/components/JsonLd";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
+import ProjectCard from "@/components/projects/ProjectCard";
 import TestimonialCard from "@/components/TestimonialCard";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import { connection } from "next/server";
 import { getPublicStats, type PublicStats } from "@/lib/public-stats";
+import { getPublicProjects } from "@/lib/projects";
 import { getPublicTestimonials } from "@/lib/testimonials";
 import { CONTACT_EMAIL, SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
 
@@ -92,7 +94,7 @@ const buildTracks = (stats: PublicStats) => [
 
 export default async function Home() {
   await connection();
-  const [stats, testimonials] = await Promise.all([getPublicStats(), getPublicTestimonials(3)]);
+  const [stats, testimonials, projects] = await Promise.all([getPublicStats(), getPublicTestimonials(3), getPublicProjects({ limit: 3 })]);
   const tracks = buildTracks(stats);
   const da = stats.byProgram.DA ?? 0;
   const sd = stats.byProgram.SD ?? 0;
@@ -354,6 +356,34 @@ export default async function Home() {
             </div>
           </div>
         </section>
+
+        {/* Student projects (only once some are published) */}
+        {projects.length > 0 && (
+          <section id="projects" className="w-full bg-surface py-space-2xl">
+            <div className="mx-auto max-w-7xl space-y-space-xl px-4 sm:px-6 lg:px-12">
+              <div className="flex flex-col justify-between gap-space-md md:flex-row md:items-end">
+                <div className="space-y-space-2xs">
+                  <span className="text-label-tag uppercase tracking-widest text-secondary">Project Showcase</span>
+                  <h2 className="font-display text-headline-xl-mobile text-primary-container md:text-headline-xl">
+                    Built by DTA Students.
+                  </h2>
+                </div>
+                <Link
+                  href="/projects"
+                  className="inline-flex items-center gap-space-xs self-start rounded-lg bg-surface-container px-space-md py-space-xs text-label-lg text-primary-container transition-all hover:bg-surface-container-highest md:self-auto"
+                >
+                  See all projects
+                  <Icon name="arrow_forward" className="text-base" />
+                </Link>
+              </div>
+              <div className="grid grid-cols-1 gap-space-lg md:grid-cols-3">
+                {projects.map((p) => (
+                  <ProjectCard key={p.id} project={p} />
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* Testimonials (only once some are approved) */}
         {testimonials.length > 0 && (

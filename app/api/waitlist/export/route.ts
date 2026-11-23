@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import type { WaitlistStatus } from "@/generated/prisma/client";
-import { auth } from "@/lib/auth";
+import { auth, isStaffRole } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 
 const STATUSES: WaitlistStatus[] = ["NEW", "CONTACTED", "ENROLLED", "ARCHIVED"];
@@ -8,7 +8,7 @@ const STATUSES: WaitlistStatus[] = ["NEW", "CONTACTED", "ENROLLED", "ARCHIVED"];
 /** Staff-only CSV export of the waitlist. Filters: ?status=NEW|CONTACTED|ENROLLED|ARCHIVED&program=<id>|none */
 export async function GET(request: NextRequest) {
   const session = await auth.api.getSession({ headers: request.headers });
-  if (!session) return NextResponse.json({ error: "Sign in required" }, { status: 401 });
+  if (!session || !isStaffRole(session.user.role)) return NextResponse.json({ error: "Staff sign-in required" }, { status: 401 });
 
   const sp = request.nextUrl.searchParams;
   const status = STATUSES.find((s) => s === sp.get("status"));

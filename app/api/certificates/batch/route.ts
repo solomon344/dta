@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { auth, isStaffRole } from "@/lib/auth";
 import { formatDate } from "@/lib/certificates";
 import { prisma } from "@/lib/db";
 
 /** Staff-only export of certificates as JSON or CSV. Filters: ?cohort=<id>&program=<id>&status=ISSUED|REVOKED|VOIDED */
 export async function GET(request: NextRequest) {
   const session = await auth.api.getSession({ headers: request.headers });
-  if (!session) return NextResponse.json({ error: "Sign in required" }, { status: 401 });
+  if (!session || !isStaffRole(session.user.role)) return NextResponse.json({ error: "Staff sign-in required" }, { status: 401 });
 
   const sp = request.nextUrl.searchParams;
   const format = sp.get("format") === "csv" ? "csv" : "json";

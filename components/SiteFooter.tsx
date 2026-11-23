@@ -36,6 +36,7 @@ export default function SiteFooter() {
             <ul className="space-y-space-xs text-body-sm">
               <li><Link href="/#tracks" className="hover:text-surface-container-lowest">Software Development</Link></li>
               <li><Link href="/#tracks" className="hover:text-surface-container-lowest">Data Analytics</Link></li>
+              <li><Link href="/projects" className="hover:text-surface-container-lowest">Student projects</Link></li>
               <li><Link href="/testimonials" className="hover:text-surface-container-lowest">Testimonials</Link></li>
               <li><Link href="/waitlist" className="hover:text-surface-container-lowest">Join the waitlist</Link></li>
             </ul>

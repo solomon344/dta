@@ -96,7 +96,9 @@ export async function unissueStudentCertificateAction(studentId: string, _: Acti
 export async function deleteStudentAction(studentId: string, _: ActionState): Promise<ActionState> {
   const user = await requireUser();
   if (user.role !== "admin") return { error: "Only admins can delete students." };
-  await prisma.student.delete({ where: { id: studentId } });
+  const student = await prisma.student.delete({ where: { id: studentId }, select: { userId: true } });
+  // Their portal login would otherwise belong to no one.
+  if (student.userId) await prisma.user.delete({ where: { id: student.userId } }).catch(() => undefined);
   updateTag(PUBLIC_REGISTRY_TAG);
   redirect("/dashboard/students");
 }

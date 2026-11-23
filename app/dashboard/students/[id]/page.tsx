@@ -10,7 +10,9 @@ import { prisma } from "@/lib/db";
 import { certificateLabel, certificateTone, studentTone } from "@/lib/labels";
 import { requireUser } from "@/lib/session";
 import { deleteStudentAction, issueStudentCertificateAction, unissueStudentCertificateAction } from "../actions";
+import PortalLinksForm from "@/components/dashboard/PortalLinksForm";
 import StudentForm from "../StudentForm";
+import { createStudentPortalLinkAction, removeStudentPortalAccessAction } from "../portal-actions";
 
 export const metadata: Metadata = { title: "Student" };
 
@@ -18,7 +20,16 @@ export default async function StudentPage({ params }: PageProps<"/dashboard/stud
   const { id } = await params;
   const user = await requireUser();
   const [student, cohorts, programs] = await Promise.all([
-    prisma.student.findUnique({ where: { id }, include: { certificate: true, cohort: true, program: true } }),
+    prisma.student.findUnique({
+      where: { id },
+      include: {
+        certificate: true,
+        cohort: true,
+        program: true,
+        user: { select: { email: true, createdAt: true } },
+        _count: { select: { projects: true } },
+      },
+    }),
     prisma.cohort.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true } }),
     prisma.program.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true } }),
   ]);
@@ -89,6 +100,45 @@ export default async function StudentPage({ params }: PageProps<"/dashboard/stud
                   <Icon name="workspace_premium" className="text-base" /> {cert ? "Issue again" : "Issue certificate"}
                 </SubmitButton>
               </ActionForm>
+            )}
+          </Card>
+
+          <Card title="Student portal">
+            {student.user ? (
+              <div className="space-y-space-sm">
+                <p className="text-body-sm text-on-surface-variant">
+                  <Badge tone="green">active</Badge> Signs in as{" "}
+                  <span className="font-bold text-on-surface">{student.user.email}</span> since {formatDate(student.user.createdAt)}.
+                  {student._count.projects > 0 && (
+                    <>
+                      {" "}
+                      <Link href={`/dashboard/projects?student=${student.id}`} className="text-secondary hover:underline">
+                        {student._count.projects} project{student._count.projects === 1 ? "" : "s"}
+                      </Link>
+                      .
+                    </>
+                  )}
+                </p>
+                <p className="text-body-sm text-on-surface-variant">Forgot their password? Send them a reset link.</p>
+                <PortalLinksForm action={createStudentPortalLinkAction.bind(null, student.id)} label="Create password-reset link" />
+                {isAdmin && (
+                  <ActionForm action={removeStudentPortalAccessAction.bind(null, student.id)} className="border-t border-surface-variant pt-space-sm">
+                    <SubmitButton variant="ghost" confirm={`Remove ${student.fullName}'s portal account? They won't be able to sign in until you send a new activation link.`}>
+                      Remove portal access
+                    </SubmitButton>
+                  </ActionForm>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-space-sm">
+                <p className="text-body-sm text-on-surface-variant">
+                  Not activated yet.{" "}
+                  {student.activationExpiresAt && student.activationExpiresAt > new Date()
+                    ? `A link was created and is valid until ${formatDate(student.activationExpiresAt)}. A new link replaces it.`
+                    : "Create a link and send it to the student so they can set up their login."}
+                </p>
+                <PortalLinksForm action={createStudentPortalLinkAction.bind(null, student.id)} label="Create activation link" variant="primary" />
+              </div>
             )}
           </Card>
 

@@ -18,6 +18,7 @@ model User {
   image         String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+  /// "admin", "staff" or "student". Students only ever reach the student portal.
   role          String?   @default("staff")
   banned        Boolean?  @default(false)
   banReason     String?
@@ -29,6 +30,8 @@ model User {
   invitationsSent      Invitation[]
   certificatesIssued   Certificate[]
   testimonialsReviewed Testimonial[]
+  projectsReviewed     Project[]
+  student              Student?
 
   @@map("user")
 }
@@ -153,6 +156,7 @@ model Program {
 
   students Student[]
   waitlist WaitlistEntry[]
+  projects Project[]
 
   @@map("program")
 }
@@ -175,6 +179,7 @@ model Cohort {
 
   students    Student[]
   signatories CohortSignatory[]
+  projects    Project[]
 
   @@map("cohort")
 }
@@ -210,9 +215,16 @@ model Student {
   notes     String?
   programId String
   cohortId  String
+  /// Student portal login, once the student has activated their account.
+  userId              String?   @unique
+  /// SHA-256 of the current activation / password-reset link token; the raw token only exists in the link.
+  activationTokenHash String?   @unique
+  activationExpiresAt DateTime?
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
 
+  user          User?          @relation(fields: [userId], references: [id], onDelete: SetNull)
+  projects      Project[]
   program       Program        @relation(fields: [programId], references: [id], onDelete: Restrict)
   cohort        Cohort         @relation(fields: [cohortId], references: [id], onDelete: Restrict)
   certificate   Certificate?
@@ -250,6 +262,7 @@ model Certificate {
   issuedBy User?   @relation(fields: [issuedById], references: [id], onDelete: SetNull)
 
   testimonials Testimonial[]
+  projects     Project[]
 
   @@map("certificate")
 }
@@ -328,4 +341,61 @@ model WaitlistEntry {
   @@index([phoneDigits])
   @@index([ipHash, createdAt])
   @@map("waitlist_entry")
+}
+
+enum ProjectStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+/// Student and graduate projects for the public showcase. Submitted through the public
+/// form (PENDING until reviewed) or added by staff; only APPROVED ones are ever public.
+model Project {
+  id            String        @id @default(cuid())
+  /// URL segment for /projects/[slug]; fixed at creation so shared links keep working.
+  slug          String        @unique
+  title         String
+  /// One line shown on gallery cards.
+  summary       String
+  description   String
+  /// Shown as "Built by", e.g. "Fatou Ceesay and Lamin Jallow".
+  builtBy       String
+  /// Tools and technologies, e.g. ["Power BI", "SQL"].
+  techStack     String[]
+  /// Public EdgeStore URLs (projectImages bucket). The first one is the cover.
+  images        String[]
+  liveUrl       String?
+  repoUrl       String?
+  videoUrl      String?
+  programId     String?
+  cohortId      String?
+  /// The student who submitted it through the student portal, if any.
+  studentId     String?
+  /// Private: for staff follow-up only, never shown publicly.
+  contactEmail  String?
+  status        ProjectStatus @default(PENDING)
+  /// Featured projects are shown first and on the home page.
+  featured      Boolean       @default(false)
+  /// When the submitter agreed to publication. Null for projects added by staff.
+  consentedAt   DateTime?
+  /// Set when the submitter proved a certificate; drives the "verified graduate" badge.
+  certificateId String?
+  /// Salted hash of the submitter's IP, used only to rate-limit the public form.
+  ipHash        String?
+  reviewedById  String?
+  reviewedAt    DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  student     Student?     @relation(fields: [studentId], references: [id], onDelete: SetNull)
+  program     Program?     @relation(fields: [programId], references: [id], onDelete: SetNull)
+  cohort      Cohort?      @relation(fields: [cohortId], references: [id], onDelete: SetNull)
+  certificate Certificate? @relation(fields: [certificateId], references: [id], onDelete: SetNull)
+  reviewedBy  User?        @relation(fields: [reviewedById], references: [id], onDelete: SetNull)
+
+  @@index([status, featured, reviewedAt])
+  @@index([ipHash, createdAt])
+  @@index([studentId])
+  @@map("project")
 }

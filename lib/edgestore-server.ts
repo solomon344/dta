@@ -5,17 +5,19 @@ import {
   createEdgeStoreNextHandler,
 } from "@edgestore/server/adapters/next/app";
 import { z } from "zod";
-import { auth } from "./auth";
+import { auth, isStaffRole } from "./auth";
 
 type Context = {
-  userId: string;
-  role: "admin" | "staff" | "anonymous";
+  /** Omitted for visitors: EdgeStore rejects empty context values. */
+  userId?: string;
+  role: "admin" | "staff" | "student" | "anonymous";
 };
 
 async function createContext({ req }: CreateContextOptions): Promise<Context> {
   const session = await auth.api.getSession({ headers: req.headers });
-  if (!session) return { userId: "", role: "anonymous" };
-  return { userId: session.user.id, role: session.user.role === "admin" ? "admin" : "staff" };
+  if (!session) return { role: "anonymous" };
+  const { role } = session.user;
+  return { userId: session.user.id, role: isStaffRole(role) ? role : role === "student" ? "student" : "anonymous" };
 }
 
 /** Staff may manage their own files; admins may manage anyone's. */
@@ -50,6 +52,19 @@ export const edgeStoreRouter = es.router({
     })
     .beforeUpload(({ ctx, input }) => canManage(ctx, input.ownerId))
     .beforeDelete(({ ctx, fileInfo }) => canManage(ctx, String(fileInfo.path.owner))),
+
+  /**
+   * Project showcase screenshots, uploaded by students (student portal) and staff. Only
+   * as temporary files: EdgeStore deletes them after 24 hours unless a server action
+   * confirms them when the project is saved. Removal also goes through server actions.
+   */
+  projectImages: es
+    .imageBucket({
+      maxSize: 1024 * 1024 * 4,
+      accept: ["image/png", "image/jpeg", "image/webp"],
+    })
+    .beforeUpload(({ ctx, fileInfo }) => ctx.role !== "anonymous" && fileInfo.temporary === true)
+    .beforeDelete(() => false),
 });
 
 export const edgeStoreHandler = createEdgeStoreNextHandler({

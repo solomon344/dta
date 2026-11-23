@@ -7,6 +7,7 @@ import { errorMessage, fieldErrorsFrom, formObject, type ActionState } from "@/l
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { findPendingInvitation } from "@/lib/invitations";
+import { homeFor } from "@/lib/session";
 
 const passwordSchema = z.string().min(8, "Use at least 8 characters.").max(128);
 
@@ -16,12 +17,14 @@ export async function signInAction(_: ActionState, formData: FormData): Promise<
     .safeParse(formObject(formData));
   if (!parsed.success) return fieldErrorsFrom(parsed.error);
 
+  let role: string | null | undefined;
   try {
-    await auth.api.signInEmail({ body: parsed.data, headers: await headers() });
+    const { user } = await auth.api.signInEmail({ body: parsed.data, headers: await headers() });
+    role = (user as { role?: string | null }).role;
   } catch (error) {
     return { error: errorMessage(error, "Invalid email or password.") };
   }
-  redirect("/dashboard");
+  redirect(homeFor(role));
 }
 
 export async function signOutAction() {

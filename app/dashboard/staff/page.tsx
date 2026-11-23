@@ -17,6 +17,7 @@ export default async function StaffPage() {
   const now = new Date();
   const [users, invitations] = await Promise.all([
     prisma.user.findMany({
+      where: { role: { in: ["admin", "staff"] } },
       orderBy: { name: "asc" },
       include: { staffProfile: { select: { jobTitle: true, photoUrl: true, signatureUrl: true } } },
     }),

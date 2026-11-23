@@ -3,20 +3,21 @@ import { redirect } from "next/navigation";
 import ActionForm from "@/components/dashboard/ActionForm";
 import SubmitButton from "@/components/dashboard/SubmitButton";
 import { Field, inputClass } from "@/components/dashboard/ui";
-import { getSession } from "@/lib/session";
+import { getSession, homeFor } from "@/lib/session";
 import { signInAction } from "../actions";
 
-export const metadata: Metadata = { title: "Staff Sign In" };
+export const metadata: Metadata = { title: "Sign In" };
 export const instant = false;
 
 export default async function LoginPage() {
-  if (await getSession()) redirect("/dashboard");
+  const session = await getSession();
+  if (session) redirect(homeFor(session.user.role));
 
   return (
     <>
-      <h1 className="font-display text-headline-lg text-primary-container">Staff sign in</h1>
+      <h1 className="font-display text-headline-lg text-primary-container">Sign in</h1>
       <p className="mb-space-lg mt-1 text-body-md text-on-surface-variant">
-        Sign in to manage cohorts, students and certificates.
+        For DTA students and staff.
       </p>
       <ActionForm action={signInAction} className="space-y-space-md">
         <Field label="Email" name="email">
@@ -28,7 +29,7 @@ export default async function LoginPage() {
         <SubmitButton className="w-full" pendingLabel="Signing in…">Sign in</SubmitButton>
       </ActionForm>
       <p className="mt-space-md text-body-sm text-outline">
-        Accounts are created by an administrator. Forgot your password? Ask an admin to reset it.
+        New student? Open the activation link DTA sent you. Forgot your password? Ask DTA staff for a new link.
       </p>
     </>
   );
